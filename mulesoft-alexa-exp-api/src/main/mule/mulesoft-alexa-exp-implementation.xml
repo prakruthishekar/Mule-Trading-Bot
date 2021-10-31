@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="main-implementaion-flow" doc:id="6f1d5398-f227-4709-afa9-6ef536c8063e" >
+		<ee:transform doc:name="requestPath" doc:id="d5d52483-4f7c-45f2-896e-dcefcca98904" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="path" ><![CDATA[%dw 2.0
+output application/json
+---
+if(payload.request."type" == "LaunchRequest" )
+"LaunchRequest"
+else
+payload.request.intent."name"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="POST" doc:name="Call Process API" doc:id="44402c48-cc50-4136-9496-6dfe3f0c7d5e" url='#["http://mulesoft-alexa-proc-api.us-e2.cloudhub.io/" ++ vars.path]'/>
+	</flow>
+</mule>

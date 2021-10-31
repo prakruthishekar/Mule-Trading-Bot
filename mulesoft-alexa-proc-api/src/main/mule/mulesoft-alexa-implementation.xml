@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:alexa="http://www.mulesoft.org/schema/mule/alexa" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:twilio-connector="http://www.mulesoft.org/schema/mule/twilio-connector" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/twilio-connector http://www.mulesoft.org/schema/mule/twilio-connector/current/mule-twilio-connector.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/alexa http://www.mulesoft.org/schema/mule/alexa/current/mule-alexa.xsd">
+	
+	
+	
+	
+	
+	<flow name="store-holdings-intent-flow" doc:id="0ddcc0d0-b617-4786-9a39-2b058c7c2b01">
+		<ee:transform doc:name="store slot values" doc:id="2cc5bc98-97e5-483c-aefb-49095e4e66b1">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="holding"><![CDATA[%dw 2.0
+output application/json
+---
+payload.request.intent.slots.number.value as Number]]></ee:set-variable>
+				<ee:set-variable variableName="cryptoName" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.request.intent.slots.crypto.resolutions.resolutionsPerAuthority.values[0][0].value.name]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<os:contains doc:name="Contains holding" doc:id="4b70de9d-89d5-457b-974c-f43be72c62d4" objectStore="StoreHolding" key="#[vars.cryptoName]" target="container" />
+		<choice doc:name="Choice" doc:id="1a188593-3fc0-472c-970f-8937c2aa32f1">
+			<when expression="#[vars.container  == true]">
+				<flow-ref doc:name="retrieve-holdings-flow" doc:id="e5f9c89a-1189-4e32-9df3-43ffecda9ca6" name="retrieve-holdings-flow" />
+				<os:store doc:name="Store updated holding" doc:id="dce2dbe2-51ec-4751-9fc0-b73a96e402fb" key="#[vars.cryptoName]" objectStore="StoreHolding">
+					<os:value><![CDATA[#[(vars.initialHolding as Number) + vars.holding as Number]]]></os:value>
+				</os:store>
+				<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;if(vars.holding &gt;1 )&#10; vars.holding as Number ++ " more "++ vars.cryptoName ++ " have been added to your portfolio in addition to your previous holding of " ++ vars.initialHolding as Number ++ vars.cryptoName ++ " ."&#10;else&#10; vars.holding as Number ++ " more "++ vars.cryptoName ++ " has been added to your portfolio in addition to your previous holding of " ++ vars.initialHolding as Number ++ vars.cryptoName ++ " ."]' doc:name="message" doc:id="dd562f97-27d9-40d8-9869-ed77e57e66ce" variableName="message" />
+				<flow-ref doc:name="notify-get-icon-flow" doc:id="a53b5be6-247d-4dc5-a22e-6a7605e3d68b" name="notify-get-icon-flow" />
+			</when>
+			<otherwise>
+				<os:store doc:name="Store holding" doc:id="c91fe56d-7244-476f-a178-2860288fe165" key="#[vars.cryptoName]" objectStore="StoreHolding">
+			<os:value><![CDATA[#[vars.holding]]]></os:value>
+		</os:store>
+				<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;if(vars.holding &gt; 1)&#10; vars.holding ++ " "  ++ vars.cryptoName ++ " have been added to your portfolio"&#10;else&#10; vars.holding ++ " " ++ vars.cryptoName ++ " has been added to your portfolio"]' doc:name="message" doc:id="4d02e757-e812-4f81-85ae-1a8ea243e662" variableName="message" />
+				<flow-ref doc:name="notify-get-icon-flow" doc:id="f191e796-0b6b-4dc8-b7ea-5282e5416892" name="notify-get-icon-flow" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Response to AVS for StoreHoldingIntent" doc:id="fcb34a5a-f4da-4fb5-88a5-616245303ba6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ {
+ 		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": "<speak>" ++ vars.message ++ "</speak>"
+			},
+			 "card": {
+      "type": "Standard",
+      "title": "Store Holding :",
+      "text": vars.message ,
+      "image": {
+        "largeImageUrl": vars.imageUrl
+      }
+    },
+			"reprompt": {
+				"outputSpeech": {
+					"type": "SSML",
+					"ssml": "<speak>try again</speak>"
+				}
+			},
+			"shouldEndSession": false
+			}
+
+	}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</flow>
+	<flow name="current-price-intent-flow" doc:id="99d2496b-41ff-47d8-a289-bea408439308" >
+		<set-variable value="#[payload.request.intent.slots.crypto.resolutions.resolutionsPerAuthority.values[0][0].value.name]" doc:name="cryptoName" doc:id="bee98fbc-ef11-4ea5-aad4-625797c15ed6" variableName="cryptoName" />
+		<flow-ref doc:name="call-coinmarket-sys-api-flow" doc:id="b596420a-0e52-41a5-b7bb-a8b6b5d3c221" name="call-coinmarket-sys-api-flow"/>
+		<ee:transform doc:name="Response to AVS for CurrentPriceIntent" doc:id="99a5d5a0-29a8-4564-a4c6-81b78c4d8a71">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+ {
+ 		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "SSML",
+				"ssml": if (payload.statistics.percent_change_7d < 0)
+				"<speak>Current worth of 1 " ++ vars.cryptoName ++ " is \$" ++ payload.price ++ " which is down by " ++  abs(payload.statistics.percent_change_7d as String {format: "0.0"} as Number) ++ " percent over last 7 days </speak>"
+				else
+				"<speak>Current worth of 1 " ++ vars.cryptoName ++ " is \$" ++ payload.price ++ " which is increased by " ++ payload.statistics.percent_change_7d as String {format: "0.0"} as Number ++ " percent over last 7 days </speak>"
+			},
+			 "card": {
+      "type": "Standard",
+      "title": "Current Value : ",
+      "text": if (payload.statistics.percent_change_7d < 0)
+      "Current worth of 1 " ++ vars.cryptoName ++ " is \$" ++ payload.price ++ " which is down by " ++  abs(payload.statistics.percent_change_7d as String {format: "0.0"} as Number )++ " percent over last 7 days."
+      else
+      "Current worth of 1 " ++ vars.cryptoName ++ " is \$" ++ payload.price ++ " which is increased by " ++ payload.statistics.percent_change_7d as String {format: "0.0"} as Number ++ " percent over last 7 days."
+      ,
+      "image": {
+        "largeImageUrl": vars.imageUrl
+        }
+        
+    },
+			"reprompt": {
+				"outputSpeech": {
+					"type": "SSML",
+					"ssml": "<speak>try again</speak>"
+				}
+			},
+			"shouldEndSession": false
+			}
+
+	}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+	<sub-flow name="retrieve-holdings-flow" doc:id="e95e629f-dee3-42e4-b684-d4c4a1bc7a8e" >
+		<os:retrieve doc:name="Retrieve Holding" doc:id="503a44e4-36e6-42e5-bf7f-9fb982cd2ebc" key="#[vars.cryptoName]" objectStore="StoreHolding" target="initialHolding">
+			<os:default-value ><![CDATA[0]]></os:default-value>
+		</os:retrieve>
+	</sub-flow>
+	
+	<flow name="call-coinmarket-sys-api-flow" doc:id="11842797-3930-4546-a9b5-459ccdc908d3">
+		<http:request method="GET" doc:name="GET Call coinmarketcap endpoint of sys API" doc:id="40ddbed1-1da2-43ef-9580-d28df6793cfb" url="http://mulesoft-alexa-sys-api.us-e2.cloudhub.io/coinMarket">
+		</http:request>
+		<ee:transform doc:name="Transformation of response" doc:id="3485de3f-ea40-4be3-bfc8-6482d30faff9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+    name : ((payload.data filter (item)->item.slug == vars.cryptoName)).name[0],
+    symbol : ((payload.data filter (item)->item.slug == vars.cryptoName)).symbol[0],
+    max_supply : ((payload.data filter (item)->item.slug == vars.cryptoName)).max_supply[0],
+    cmc_rank : ((payload.data filter (item)->item.slug == vars.cryptoName)).cmc_rank[0],
+    max_supply: ((payload.data filter (item)->item.slug == vars.cryptoName)).max_supply[0],
+    circulating_supply : ((payload.data filter (item)->item.slug == vars.cryptoName)).circulating_supply[0],
+    total_supply : ((payload.data filter (item)->item.slug == vars.cryptoName)).total_supply[0],
+    price : if(((payload.data filter (item)->item.slug == vars.cryptoName)).quote.USD.price[0] >= 1)
+((payload.data filter (item)->item.slug == vars.cryptoName)).quote.USD.price[0]  as String {format: "0.00"} as Number
+  else 
+  ((payload.data filter (item)->item.slug == vars.cryptoName)).quote.USD.price[0]  as String {format: "0.00000"} as Number,
+    statistics : ((payload.data filter (item)->item.slug == vars.cryptoName)).quote.USD[0]
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+		<http:request method="GET" doc:name="GET Call to imageurl endpoint of sys API" doc:id="4a6f2abc-be32-4cd5-a8cc-5b60384ede74" url="http://mulesoft-alexa-sys-api.us-e2.cloudhub.io/imageurl" target="imageUrl">
+			<http:body ><![CDATA[#[{
+	symbol : payload.symbol
+	
+	}]]]></http:body>
+		</http:request>
+	</flow>
+	<flow name="remove-holding-intent-flow" doc:id="d714c048-2cca-4deb-8c71-1c989d0b6280">
+		<ee:transform doc:name="store slot values" doc:id="14bdd675-f1fe-4cfc-9e91-91152922861a">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="cryptoName"><![CDATA[%dw 2.0
+output application/json
+---
+payload.request.intent.slots.crypto.resolutions.resolutionsPerAuthority.values[0][0].value.name]]></ee:set-variable>
+				<ee:set-variable variableName="holding"><![CDATA[%dw 2.0
+output application/json
+---
+payload.request.intent.slots.number.value as Number]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<os:retrieve doc:name="Retrieve holding" doc:id="56843e91-186c-4fe1-8dba-b8d98bd42657" key="#[vars.cryptoName]" objectStore="StoreHolding" target="presentHolding">
+			<os:default-value><![CDATA[0]]></os:default-value>
+		</os:retrieve>
+		<choice doc:name="Choice" doc:id="261e37e3-71a2-464d-9b8d-d7dd155dcb90">
+			<when expression="#[(vars.presentHolding &gt;= vars.holding) == true]">
+				<os:store doc:name="Store Updated Holding" doc:id="5f87f4f8-d2c8-46ac-88ee-2e9a95c86d8d" key="#[vars.cryptoName]" objectStore="StoreHolding">
+					<os:value><![CDATA[#[vars.presentHolding as Number - vars.holding as Number]]]></os:value>
+				</os:store>
+				<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;if((vars.holding &gt; 1) and (vars.presentHolding as Number - vars.holding as Number) != 0)&#10; vars.holding ++ " "  ++ vars.cryptoName ++ " have been removed from your portfolio. You currently have " ++ (vars.presentHolding as Number - vars.holding as Number) ++ " " ++ vars.cryptoName ++ " in your possession."&#10;else if((vars.holding == 1) and (vars.presentHolding as Number - vars.holding as Number) != 0)&#10; vars.holding ++ " " ++ vars.cryptoName ++ " has been removed from your portfolio. You currently have " ++ (vars.presentHolding as Number - vars.holding as Number) ++ " " ++ vars.cryptoName ++" in your possession."&#10;else if(((vars.holding &gt; 1) and (vars.presentHolding as Number - vars.holding as Number) == 0))&#10;vars.holding ++ " "  ++ vars.cryptoName ++ " have been removed from your portfolio.You currently have no " ++ vars.cryptoName ++ " in your possession."&#10;else&#10; vars.holding ++ " "  ++ vars.cryptoName ++ " has been removed from your portfolio.You currently have no  " ++ vars.cryptoName ++ " in your possession."]' doc:name="message" doc:id="d14535e5-ad94-4ffd-8810-3096a129696e" variableName="message" />
+				<flow-ref doc:name="notify-get-icon-flow" doc:id="0394c4cb-8fa1-415f-b7c8-62e1334bb266" name="notify-get-icon-flow" />
+			</when>
+			<otherwise>
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;if(vars.holding &gt; vars.presentHolding)&#10;&quot;You hold &quot; ++ vars.presentHolding ++ &quot; &quot; ++ vars.cryptoName ++ &quot;. Please provide valid holding number to be remove from the account.&quot;&#10;else&#10;&quot;You don't hold any &quot; ++ vars.cryptoName ++ &quot; in your portfolio. &quot;]" doc:name="message" doc:id="f8278a8a-67b4-4263-8fb1-6e08118508b6" variableName="message" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Response to AVS for RemoveHoldingIntent" doc:id="762e2830-16db-48ad-8a0b-26c1989203b9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ {
+ 		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "PlainText",
+			    "text": vars.message
+			},
+			 "card": {
+      "type": "Standard",
+      "title": "Remove Holding :",
+      "text": vars.message,
+      "image": {
+        "largeImageUrl": vars.imageUrl
+      }
+    },
+			"reprompt": {
+				"outputSpeech": {
+					"type": "SSML",
+					"ssml": "<speak>try again</speak>"
+				}
+			},
+			"shouldEndSession": false
+			}
+
+	}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<sub-flow name="notify-get-icon-flow" doc:id="d49fc902-e1a1-40ea-a0a4-70f299331b11" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="7f4031ae-da8b-450c-b988-e0660e48ba07" >
+			<route >
+				<flow-ref doc:name="call-coinmarket-sys-api-flow" doc:id="6d841569-6eb3-44ee-a736-fd0b236ae03a" name="call-coinmarket-sys-api-flow" />
+			</route>
+			<route >
+				<twilio-connector:send-message doc:name="Notify via Message" doc:id="6181ee09-1960-4e7d-8ace-32b93356e07c" config-ref="Twilio_Config" account-sid="${secure::twilio.account.sid}">
+			<twilio-connector:send-message-request-data><![CDATA[#[{
+	Body: vars.message,
+    From: p("secure::twilio.from.number"),
+	To: p('secure::twilio.send.number')
+}]]]></twilio-connector:send-message-request-data>
+		</twilio-connector:send-message>
+			</route>
+		</scatter-gather>
+	</sub-flow>
+	<flow name="holding-intent-flow" doc:id="c775ff44-a527-4d7d-8ede-2bdba264c93a" >
+		<os:retrieve-all doc:name="Retrieve all holdings" doc:id="254379b1-846a-43b9-86e0-57ecf3080cfe" objectStore="StoreHolding" />
+		<choice doc:name="Choice" doc:id="0ac5289a-c7d6-4aa6-be66-b2492f8dc020" >
+			<when expression="#[isEmpty(payload) == true]">
+				<set-payload value="In the Mule Trading app, you haven't saved any of your holdings." doc:name="Set Payload" doc:id="636cfda2-d48d-40cb-9da4-dfa583b29b04" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="transform payload to array format" doc:id="7ff80071-ade5-496b-ab42-43e09086f343">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload pluck ((value, key, index) -> 
+{
+    "key" : key,
+    "value" : value,
+    "index" : index
+}
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<parallel-foreach doc:name="Parallel For Each" doc:id="ffdc4158-9211-4d68-baf6-dbdd963016bf" collection="#[payload]">
+			<set-variable value="#[payload.key]" doc:name="cryptoName" doc:id="f29982bb-38fb-4ab8-a950-9756a16c50fc" variableName="cryptoName" />
+			<set-variable value="#[payload.value as Number]" doc:name="holding" doc:id="ebfda228-2e55-4508-a76b-21dc9afaac95" variableName="holding" />
+			<flow-ref doc:name="call-coinmarket-sys-api-flow" doc:id="b3cca0e3-1d55-420e-8c0b-4177b47c041c" name="call-coinmarket-sys-api-flow" />
+			<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10; {&#10;        "crypto_name": vars.cryptoName,&#10;        "holding_number": vars.holding,&#10;        "single_coin_price": payload.price,&#10;        "total_holding_price":  vars.holding * payload.price,&#10;        "icon": vars.imageUrl&#10;    }]' doc:name="Set Payload" doc:id="dfe9f1c4-16a0-4603-90e1-99e98bd5e12f" />
+		</parallel-foreach>
+				<ee:transform doc:name="response" doc:id="7182b945-efca-4f56-b76b-5a78e5ba70ea">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var overall = "You have \$" ++ sum(payload.payload map ((item, index) -> upper(item.total_holding_price as Number))) ++ " worth holdings in your portfolio, which includes "
+---
+overall ++ (payload.payload map ((item, index) -> 
+upper(item.holding_number as Number ++ " " ++ item.crypto_name ++ " worth \$" ++ item.total_holding_price)) joinBy  " , ")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Response to AVS for CurrentHoldingIntent" doc:id="c2ed891d-8f81-479a-a464-cb6d69493d79" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ {
+ 		"version": "1.0",
+		"response": {
+			"outputSpeech": {
+				"type": "PlainText",
+			    "text": payload
+			},
+			 "card": {
+      "type": "Standard",
+      "title": "Overall Holding:",
+      "text": payload,
+      "image": {
+        "largeImageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ16oZsMvwAEzW1RO2SwESpBuFiz9LnqejUCA&usqp=CAU"
+        }
+    },
+			"reprompt": {
+				"outputSpeech": {
+					"type": "SSML",
+					"ssml": "<speak>try again</speak>"
+				}
+			},
+			"shouldEndSession": false
+			}
+
+	}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

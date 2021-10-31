@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="call-coinapi-endpoint" doc:id="af3f1ac7-d763-4291-a8c7-e91dca81c6dd" >
+		<http:request method="GET" doc:name="GET icons from coinapi API" doc:id="db37a7e5-6ad0-4889-9f6d-0f94768b0839" url="${url.coinapi}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-CoinAPI-Key" : p('secure::coinapi.apiKey')
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Image URl" doc:id="58dbd2da-6f56-4dcd-9797-1b95d73ae89c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+((payload filter (item)->item.asset_id == payload.symbol)).url]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="call-coingecoko-api" doc:id="8453b3cb-6540-4bdd-bdc3-d0641cc12668" >
+		<http:request method="GET" doc:name="GET Call to Coingecko API to get trending coins" doc:id="98c57653-e125-4aaa-96fc-70321e8f2221" url="${url.coingecko}" />
+	</flow>
+	<flow name="binance-open-orders" doc:id="1e734fe7-7aeb-4785-8f15-833d8f0e8ebd" >
+		<http:request method="GET" doc:name="Get Call to get open orders from Binance" doc:id="8ed7e318-5dba-4d76-a2f0-407351997ea3" config-ref="HTTP_Request_Config_Binance" path="${binance.path.openOrders}">
+			<http:headers ><![CDATA[#[output application/json
+
+---
+{ 
+	
+	"Content-Type" : "application/json",
+	"X-MBX-APIKEY" : p('secure::binance.key'),
+	
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[output application/x-www-form-urlencoded
+import dw::Crypto
+var a = {
+	timestamp : now() as Number {unit: "milliseconds"}
+	}
+---
+a ++ {
+		"signature": Crypto::HMACWith(p("secure::binance.secret") as Binary,(a pluck ((value, key, index) -> key ++ "=" ++ value  ) joinBy  "&")  as Binary, "HmacSHA256"),
+	
+}]]]></http:query-params>
+		</http:request>
+	</flow>
+	<flow name="binance-cancel-open-orders" doc:id="d3e4ed86-9057-4e7d-8771-cff0a066d637" >
+		<http:request method="DELETE" doc:name="Delete Call to System API to cancel open orders" doc:id="39e902fd-0998-44dc-98c0-8a4473ce29e5" config-ref="HTTP_Request_Config_Binance" path="${binance.path.openOrders}">
+			<http:body ><![CDATA[#[output application/x-www-form-urlencoded
+import dw::Crypto
+var a = {
+	symbol : payload.symbol,
+	timestamp : now() as Number {unit: "milliseconds"}
+	}
+---
+a ++ {
+		"signature": Crypto::HMACWith(p("secure::binance.secret")  as Binary,(a pluck ((value, key, index) -> key ++ "=" ++ value  ) joinBy  "&")  as Binary, "HmacSHA256"),
+	
+	
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/json
+
+---
+{ 
+	
+	"Content-Type" : "application/json",
+	"X-MBX-APIKEY" : p('secure::binance.key'),
+	
+}]]]></http:headers>
+		</http:request>
+	</flow>
+	<flow name="binance-limit-order" doc:id="9b17889a-4326-4715-aecc-28c3b5a55d1b" >
+		<http:request method="POST" doc:name="POST-Call to Binance System API to place Limit order" doc:id="baa0d042-7261-40d9-aa4f-0f9d8505cc3d" config-ref="HTTP_Request_Config_Binance" path="${binance.path.order}" >
+			<http:body ><![CDATA[#[output application/x-www-form-urlencoded
+import dw::Crypto
+var a = {
+    symbol: payload.symbol,
+    	side: payload.side,
+        "type": payload.'type',
+        	timeInForce: payload.timeInForce,
+            quantity: payload.quantity,
+    price: payload.price,
+	timestamp : now() as Number {unit: "milliseconds"}
+	}
+---
+a ++ {
+		"signature": Crypto::HMACWith(p("secure::binance.secret") as Binary,(a pluck ((value, key, index) -> key ++ "=" ++ value  ) joinBy  "&")  as Binary, "HmacSHA256"),
+	
+	
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/json
+
+---
+{ 
+	
+	"Content-Type" : "application/json",
+	"X-MBX-APIKEY" : p('secure::binance.key'),
+	
+}]]]></http:headers>
+		</http:request>
+	</flow>
+	<flow name="call-coinMarket-api" doc:id="7956b4fd-fd05-4541-8499-ca4af09ec1a6" >
+		<http:request method="GET" doc:name="GET Call to coinmarketcap API" doc:id="a3e31ccb-444c-4243-8031-307503ff02e2" url="${url.coinmarket}" >
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-CMC_PRO_API_KEY" : p('secure::coinmarket.apiKey')
+}]]]></http:headers>
+		</http:request>
+	</flow>
+	<flow name="binance-market-order" doc:id="f725de43-5e4d-4c32-b7f8-f60f98cd6d2f" >
+		<http:request method="POST" doc:name="POST-Call to Binance System API to place Market order" doc:id="6760dd43-f53d-49d9-9277-f775b1a2be36" config-ref="HTTP_Request_Config_Binance" path="${binance.path.order}" >
+			<http:body ><![CDATA[#[output application/x-www-form-urlencoded
+import dw::Crypto
+var a = {
+    symbol: payload.symbol,
+    side: payload.side,
+    "type": payload."type",
+    quoteOrderQty: payload.quoteOrderQty ,
+    timestamp : now() as Number {unit: "milliseconds"}
+	}
+---
+a ++ {
+		"signature": Crypto::HMACWith(p("secure::binance.secret") as Binary,(a pluck ((value, key, index) -> key ++ "=" ++ value  ) joinBy  "&")  as Binary, "HmacSHA256"),		
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/json
+
+---
+{ 
+	
+	"Content-Type" : "application/json",
+	"X-MBX-APIKEY" : p('secure::binance.key'),
+	
+}]]]></http:headers>
+		</http:request>
+	</flow>
+</mule>

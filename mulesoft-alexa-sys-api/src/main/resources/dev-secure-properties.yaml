@@ -1,0 +1,10 @@
+coinapi:
+  apiKey: "![*****]" 
+  
+binance:
+  key: "![*******]" 
+  secret: "![********]"   
+  
+coinmarket:
+  apiKey: "![******]"
+     

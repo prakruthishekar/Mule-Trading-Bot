@@ -1,0 +1,730 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "mule trading bot",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "CurrentPrice",
+                    "slots": [
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency"
+                        }
+                    ],
+                    "samples": [
+                        "current value of {crypto}",
+                        "value of {crypto}",
+                        "what's the price of {crypto}",
+                        "current price of {crypto}"
+                    ]
+                },
+                {
+                    "name": "StoreHolding",
+                    "slots": [
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "samples": [
+                                "it's {crypto}",
+                                "{crypto}"
+                            ],
+                            "multipleValues": {
+                                "enabled": true
+                            }
+                        },
+                        {
+                            "name": "number",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "it's {number}",
+                                "{number}"
+                            ],
+                            "multipleValues": {
+                                "enabled": true
+                            }
+                        }
+                    ],
+                    "samples": [
+                        "Could you please add {number} {crypto} as well",
+                        "Can you store my holdings",
+                        "{number} {crypto}",
+                        "store {number} {crypto}",
+                        "remeber my {crypto} holding "
+                    ]
+                },
+                {
+                    "name": "RemoveHolding",
+                    "slots": [
+                        {
+                            "name": "number",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "it's {number}",
+                                "{number} "
+                            ]
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "samples": [
+                                "it's {crypto}",
+                                "{crypto}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "Could you please take {number} {crypto} out of my wallet",
+                        "remove {number} {crypto}"
+                    ]
+                },
+                {
+                    "name": "CurrentHolding",
+                    "slots": [],
+                    "samples": [
+                        "Give me an Update on my portfolio",
+                        "read my portfolio",
+                        "Please read my portfolio",
+                        "show my holdings"
+                    ]
+                },
+                {
+                    "name": "TrendingCrypto",
+                    "slots": [],
+                    "samples": [
+                        "Fetch me the list of trending cryptocurrencies",
+                        "trending crypto",
+                        "list of trending crypto currecy",
+                        "trending crypto currency"
+                    ]
+                },
+                {
+                    "name": "PlaceLimitOrder",
+                    "slots": [
+                        {
+                            "name": "limitType",
+                            "type": "limitType",
+                            "samples": [
+                                "{limitType}"
+                            ]
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "samples": [
+                                "its {crypto}",
+                                "{crypto}"
+                            ]
+                        },
+                        {
+                            "name": "amount",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "its {amount} dollars",
+                                "{amount} dollars"
+                            ]
+                        },
+                        {
+                            "name": "price",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "its {price} dollar",
+                                "its {price} dollars",
+                                "{price} dollar"
+                            ]
+                        },
+                        {
+                            "name": "type",
+                            "type": "type"
+                        }
+                    ],
+                    "samples": [
+                        "place buy limit order",
+                        "place {type} {limitType} order for {crypto}",
+                        "place  {type} {limitType} order"
+                    ]
+                },
+                {
+                    "name": "CancelOrder",
+                    "slots": [],
+                    "samples": [
+                        "cancel my open orders on binanace",
+                        "Please cancel open orders on binance",
+                        "cancel order",
+                        "cancel my open orders"
+                    ]
+                },
+                {
+                    "name": "PlaceMarketOrder",
+                    "slots": [
+                        {
+                            "name": "marketType",
+                            "type": "marketType",
+                            "samples": [
+                                "{marketType}"
+                            ]
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "samples": [
+                                "its {crypto}",
+                                "{crypto}"
+                            ]
+                        },
+                        {
+                            "name": "amount",
+                            "type": "AMAZON.NUMBER",
+                            "samples": [
+                                "its {amount} dollars",
+                                "{amount} dollars"
+                            ]
+                        },
+                        {
+                            "name": "type",
+                            "type": "type"
+                        }
+                    ],
+                    "samples": [
+                        "place  sell order on  market type for doge",
+                        "place  {type} order on  {marketType} type for {crypto}",
+                        "execute {type} order on  {marketType} type  for {crypto}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "cryptoCurrency",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "maple"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "videocoin"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "valobit"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "marlin"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "hydra"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "solana"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "xrp"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "polkadot-new"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "cardano",
+                                "synonyms": [
+                                    "CARDANO",
+                                    "cardano"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "decentraland",
+                                "synonyms": [
+                                    "decentraland",
+                                    "decentrland",
+                                    "decenter land"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "dogecoin",
+                                "synonyms": [
+                                    "dogecoin",
+                                    "dog",
+                                    "doge"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "tron",
+                                "synonyms": [
+                                    "trons",
+                                    "tran",
+                                    "tron",
+                                    "troon"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "binance-coin",
+                                "synonyms": [
+                                    "binanc",
+                                    "binance",
+                                    "BINANCE"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "shiba-inu",
+                                "synonyms": [
+                                    "shiba",
+                                    "shib inu",
+                                    "shiba-inu",
+                                    "shiba"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "ethereum",
+                                "synonyms": [
+                                    "etherum",
+                                    "thereum",
+                                    "etherium"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "bitcoin",
+                                "synonyms": [
+                                    "btcoin",
+                                    "btc",
+                                    "bitcon"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "limitType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "LIMIT",
+                                "synonyms": [
+                                    "limit"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "marketType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "MARKET",
+                                "synonyms": [
+                                    "MARKET",
+                                    "market"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ocoType",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "OCO",
+                                "synonyms": [
+                                    "oco",
+                                    "OCO",
+                                    "O C O",
+                                    "o c o"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "type",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "SELL",
+                                "synonyms": [
+                                    "sell"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "BUY",
+                                "synonyms": [
+                                    "buy"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "StoreHolding",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1015198319212.281892682005"
+                            }
+                        },
+                        {
+                            "name": "number",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1015198319212.660349935388"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "RemoveHolding",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.338035094309"
+                    },
+                    "slots": [
+                        {
+                            "name": "number",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.739262824635.1457368324326"
+                            }
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.739262824635.1509918933147"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PlaceLimitOrder",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.722632937700"
+                    },
+                    "slots": [
+                        {
+                            "name": "limitType",
+                            "type": "limitType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1531245674405.154064666974"
+                            }
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1451604991423.614575446518"
+                            }
+                        },
+                        {
+                            "name": "amount",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1451604991423.750094458"
+                            },
+                            "validations": [
+                                {
+                                    "type": "isGreaterThanOrEqualTo",
+                                    "prompt": "Slot.Validation.722632937700.338217799072.682358019053",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "price",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1451604991423.1148347647472"
+                            }
+                        },
+                        {
+                            "name": "type",
+                            "type": "type",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "PlaceMarketOrder",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.511436731660"
+                    },
+                    "slots": [
+                        {
+                            "name": "marketType",
+                            "type": "marketType",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.511436731660.1220875577682"
+                            }
+                        },
+                        {
+                            "name": "crypto",
+                            "type": "cryptoCurrency",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.511436731660.784114065723"
+                            }
+                        },
+                        {
+                            "name": "amount",
+                            "type": "AMAZON.NUMBER",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.511436731660.1402974425524"
+                            }
+                        },
+                        {
+                            "name": "type",
+                            "type": "type",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.1015198319212.660349935388",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Can you also tell me how many holdings you have"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Slot.1015198319212.660349935388",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Are you sure that's the number of holdings"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1015198319212.281892682005",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Could you please name currency that you're holding"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Slot.1015198319212.281892682005",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is it {crypto} "
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.739262824635.1457368324326",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "please provide number of holding to be removed"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.739262824635.1509918933147",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Can you give the holding name that needs to  be removed"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1451604991423.614575446518",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Could you tell me the name of the crypto currency you want to place an order for?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1451604991423.750094458",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the total amount for which you wish to place an order... you can place an order for an amount greater than ten dollars"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1451604991423.1148347647472",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Can you also specify the price at which you want your limit order to be placed?"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Intent.722632937700",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "You're placing {limitType} order for {amount} dollars... on {crypto} cryptocurrency when the price hits {price} ...Do you like to comfirm"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": " You're placing {limitType} order for {amount} dollars... on {crypto} cryptocurrency when the price hits {price} ...Would you like to confirm"
+                    }
+                ]
+            },
+            {
+                "id": "Slot.Validation.722632937700.338217799072.682358019053",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Minimum amount to place an order is above ten dollars...Please provide the valid amount"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1531245674405.154064666974",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What's the order type"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.511436731660.1220875577682",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is the order type"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.511436731660.1402974425524",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Please provide the total amount for which you wish to place an order"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.511436731660.784114065723",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Could you tell me the name of the crypto currency you want to place an order for?"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Intent.511436731660",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "You're placing {marketType} order for {amount} dollars... on {crypto} cryptocurrency ...Would you like to comfirm"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "You're placing {marketType} order for {amount} dollars... on {crypto} cryptocurrency ...Do you like to comfirm"
+                    }
+                ]
+            },
+            {
+                "id": "Confirm.Intent.338035094309",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Is it correct that you wish to withdraw {number} {crypto} from your portfolio?"
+                    }
+                ]
+            }
+        ]
+    }
+}

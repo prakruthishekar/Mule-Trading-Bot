@@ -1,0 +1,78 @@
+#%RAML 1.0
+title: mulesoft-alexa-sys-api
+
+mediaType:
+  - application/json
+protocols:
+  - HTTP
+  
+/imageurl:
+  get:
+    body:
+      example:
+        {
+          symbol: "SHIB"
+        }
+    responses:
+        200:
+          body:
+            application/json:
+              examples:
+                
+
+/tredningCrypto:
+  get:
+    responses:
+        200:
+          body:
+            application/json:
+              examples:
+                
+
+/coinMarket:
+  get:
+    responses:
+        200:
+          body:
+            application/json:
+              examples:                
+
+/openOrders:
+  get:
+    responses:
+        200:
+          body:
+            application/json:
+              examples:
+
+/cancelOrders:    
+  delete:
+    body:
+      application/json:
+        example: !include /examples/cancelOpenOrdersRequest.raml
+
+/limitOrder:
+  post:
+    body:
+      application/json:
+        example:  !include /examples/limitOrderRequest.raml
+    responses:
+      "200":
+        body:
+          application/json:
+                examples:
+
+/marketOrder:
+  post:
+    body:
+      application/json:
+        example:  !include /examples/marketOrderRequest.raml
+    responses:
+      "200":
+        body:
+          application/json:
+                examples:
+
+
+                
+      

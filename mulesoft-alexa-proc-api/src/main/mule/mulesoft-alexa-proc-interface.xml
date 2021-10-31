@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="api-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\AMAZON.StopIntent:application\json:api-config">
+        <logger level="INFO" message="post:\AMAZON.StopIntent:application\json:api-config" />
+        <flow-ref doc:name="stop-intent-flow" doc:id="87629360-b376-4c52-8035-5356a5cf8139" name="stop-intent-flow" />
+    </flow>
+    <flow name="post:\TrendingCrypto:application\json:api-config">
+        <logger level="INFO" message="post:\TrendingCrypto:application\json:api-config" />
+        <flow-ref doc:name="trending-intent-flow" doc:id="a8960968-522f-4f5b-86a1-3cd03a50ce58" name="trending-intent-flow" />
+    </flow>
+    <flow name="post:\LaunchRequest:application\json:api-config">
+        <logger level="INFO" message="post:\LaunchRequest:application\json:api-config" />
+        <flow-ref doc:name="launch-intent-flow" doc:id="262cc466-044a-4182-bdf0-3ab4b89ec666" name="launch-intent-flow" />
+    </flow>
+    <flow name="post:\CancelOrder:application\json:api-config">
+        <logger level="INFO" message="post:\CancelOrder:application\json:api-config" />
+        <flow-ref doc:name="cancel-all-open-orders-flow" doc:id="2883b867-a145-4bac-8c40-12d7e5aa8187" name="cancel-all-open-orders-flow" />
+    </flow>
+    <flow name="post:\CurrentHolding:application\json:api-config">
+        <logger level="INFO" message="post:\CurrentHolding:application\json:api-config" />
+        <flow-ref doc:name="holding-intent-flow" doc:id="084e87be-1af1-4cff-8550-7baaa0829568" name="holding-intent-flow" />
+    </flow>
+    <flow name="post:\CurrentPrice:application\json:api-config">
+        <logger level="INFO" message="post:\CurrentPrice:application\json:api-config" />
+        <flow-ref doc:name="current-price-intent-flow" doc:id="f521cc42-1d8d-4b5a-91c5-28a5b6a51a20" name="current-price-intent-flow" />
+    </flow>
+    <flow name="post:\RemoveHolding:application\json:api-config">
+        <logger level="INFO" message="post:\RemoveHolding:application\json:api-config" />
+        <flow-ref doc:name="remove-holding-intent-flow" doc:id="54ddddf3-5f28-4110-aa7b-2bd89bb8d755" name="remove-holding-intent-flow" />
+    </flow>
+    <flow name="post:\StoreHolding:application\json:api-config">
+        <logger level="INFO" message="post:\StoreHolding:application\json:api-config" />
+        <flow-ref doc:name="store-holdings-intent-flow" doc:id="617b085d-08f8-4f4c-88a7-23faf6245572" name="store-holdings-intent-flow" />
+    </flow>
+    <flow name="post:\PlaceLimitOrder:application\json:api-config">
+        <logger level="INFO" message="post:\PlaceLimitOrder:application\json:api-config" />
+        <flow-ref doc:name="place-limit-order-flow" doc:id="d2343603-d1aa-4636-aea1-4ec602dde1bb" name="place-limit-order-flow" />
+    </flow>
+    <flow name="post:\PlaceMarketOrder:application\json:api-config">
+        <logger level="INFO" message="post:\PlaceMarketOrder:application\json:api-config" />
+        <flow-ref doc:name="place-market-order-flow" doc:id="2e084dba-60d2-4248-8c2a-730f7e758776" name="place-market-order-flow" />
+    </flow>
+</mule>

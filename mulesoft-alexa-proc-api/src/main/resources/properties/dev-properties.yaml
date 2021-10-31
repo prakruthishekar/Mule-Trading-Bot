@@ -1,0 +1,12 @@
+http:
+  host: "0.0.0.0"
+  port: "8081"
+  
+twilio:
+  host: "api.twilio.com"
+  port: "443"
+  base: "/2010-04-01"
+  protocol: "HTTPS" 
+  response: "10000"   
+              
+  

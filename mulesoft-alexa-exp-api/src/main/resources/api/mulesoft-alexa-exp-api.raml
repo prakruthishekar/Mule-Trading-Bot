@@ -1,0 +1,17 @@
+#%RAML 1.0
+title: mulesoft-alexa-exp-api
+
+mediaType:
+  - application/json
+protocols:
+  - HTTPS
+  
+/alexa:
+  post:
+    body:
+      application/json:
+        example: !include /examples/IntentRequestExample.raml
+    responses:
+      "200":
+        body:
+          type: object

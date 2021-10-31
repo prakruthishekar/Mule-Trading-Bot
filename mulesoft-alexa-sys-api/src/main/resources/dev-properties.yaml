@@ -1,0 +1,14 @@
+http: 
+  host: "0.0.0.0"
+  port: "8083"
+  
+url:
+  coinapi: "https://rest.coinapi.io/v1/assets/icons/50" 
+  coingecko: "https://api.coingecko.com/api/v3/search/trending"
+  coinmarket: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=5000&convert=USD"
+  
+binance:
+  host: "api.binance.com" 
+  path:
+    openOrders: "/api/v3/openOrders"
+    order: "/api/v3/order"

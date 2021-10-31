@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:twilio-connector="http://www.mulesoft.org/schema/mule/twilio-connector" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/twilio-connector http://www.mulesoft.org/schema/mule/twilio-connector/current/mule-twilio-connector.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<twilio-connector:config name="Twilio_Config" doc:name="Twilio Connector Config" doc:id="03b88fad-a274-4868-b543-f97635557c2c" property_username="${secure::twilio.account.sid}" property_password="${secure::twilio.account.password}" property_host="${twilio.host}" property_port="${twilio.port}" property_basePath="${twilio.base}" property_protocol="${twilio.protocol}" property_responseTimeout="${twilio.response}"/>
+	<configuration-properties doc:name="Configuration properties" doc:id="532ef1b0-536e-4576-b349-67b73964bc18" file="properties\dev-properties.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="00bc07b8-a138-443d-a22f-275b9b462629" file="properties\secure-properties.yaml" key="${key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<http:request-config name="User_Profile_Request_Config" doc:name="HTTP Request configuration" doc:id="2582df0d-ad44-4c7b-a75a-95fab28215af" basePath="/user" >
+		<http:request-connection protocol="HTTPS" host="api.amazon.com" />
+	</http:request-config>
+	<os:object-store name="Object_store_Notification" doc:name="Object store" doc:id="6fb50acf-5332-41cf-a0d1-f022bcda834a" />
+	
+	<os:object-store name="StoreIconsLinks" doc:name="Object store" doc:id="a67c3ae0-f819-43a5-b92e-2c6808599b47" entryTtlUnit="DAYS" />
+	<os:object-store name="StoreHolding" doc:name="Object store" doc:id="4d7c4fa3-d89e-4058-b514-a929071b51ec" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0d0326f7-06c0-4673-b058-622530ffd60e" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<os:object-store name="Store_User_Info" doc:name="Object store" doc:id="403ea2d3-d74d-4f5f-8772-e15bb4a12440" />
+</mule>
